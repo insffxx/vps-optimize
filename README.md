@@ -7,7 +7,7 @@
 
 ## 一键运行
 
-先切到 root（`sudo -i`），再执行：
+复制这一条到终端执行（普通账号也可以，脚本会自动用 sudo 提权）：
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/insffxx/vps-optimize/main/vps-optimize.sh)
@@ -108,7 +108,7 @@ special handling for Oracle Cloud images). Every item is independent: it explain
 confirmation, backs up the files it touches to `/var/backups/vps-optimize/<timestamp>/`, then verifies the result.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/insffxx/vps-optimize/main/vps-optimize.sh)   # as root
+bash <(curl -fsSL https://raw.githubusercontent.com/insffxx/vps-optimize/main/vps-optimize.sh)   # auto-sudo if needed
 sudo bash vps-optimize.sh          # menu (pick several: "1 2 5 9")
 sudo bash vps-optimize.sh auto     # recommended safe set, press Enter all the way
 sudo bash vps-optimize.sh status   # read-only overview

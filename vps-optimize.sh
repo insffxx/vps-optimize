@@ -53,7 +53,14 @@ put(){ # put <文件> <权限>  内容从 stdin 读入
   backup "$f"; mkdir -p "$(dirname "$f")"; install -m "$mode" "$tmp" "$f"; rm -f "$tmp"; }
 
 # ---------- 环境检测 ----------
-need_root(){ [ "$(id -u)" -eq 0 ] || { err "需要 root 权限：先执行 sudo -i 切到 root，再运行本脚本"; exit 1; }; }
+need_root(){
+  [ "$(id -u)" -eq 0 ] && return 0
+  command -v sudo >/dev/null || { err "需要 root 权限：先切到 root 再运行"; exit 1; }
+  info "需要 root 权限，自动用 sudo 重新运行…"
+  if [ -f "$SELF" ] && [[ "$SELF" != /dev/fd/* && "$SELF" != /proc/* ]]; then exec sudo bash "$SELF" "$@"; fi
+  # 通过 bash <(curl …) 运行时没有本地文件，重新下载一次再以 root 执行
+  exec sudo bash -c 'bash <(curl -fsSL "$0") "$@"' "$RAW_URL" "$@"
+}
 os_check(){
   . /etc/os-release 2>/dev/null || { err "无法识别系统"; exit 1; }
   case "${ID:-}" in ubuntu|debian) : ;; *) warn "未在 ${PRETTY_NAME:-该系统} 上测试过，继续请自行承担风险"; yesno "继续？" || exit 1 ;; esac
@@ -637,7 +644,7 @@ menu(){
 case "${1:-}" in
   -h|--help|help) sed -n '2,18p' "$SELF" 2>/dev/null || echo "用法：vps-optimize.sh [status|list|auto|编号…]"; exit 0 ;;
 esac
-need_root; os_check
+need_root "$@"; os_check
 case "${1:-}" in
   "") menu ;;
   status) t_status ;;
